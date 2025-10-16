@@ -1,0 +1,96 @@
+#include <stdio.h>
+
+typedef struct {
+    int sum;
+    int start;
+    int end;
+} Subarray;
+
+Subarray Max_Sum_Subarray(int arr[], int low, int high, int constraint) {
+    Subarray no_solution = {0, -1, -1};
+
+    if (low > high) return no_solution;
+
+    if (low == high) {
+        if (arr[low] <= constraint) {
+            return (Subarray){arr[low], low, high};
+        } else {
+            return no_solution;
+        }
+    }
+
+    int mid = (low + high) / 2;
+
+    Subarray left = Max_Sum_Subarray(arr, low, mid, constraint);
+    Subarray right = Max_Sum_Subarray(arr, mid + 1, high, constraint);
+
+    int sum = 0;
+    int left_sum = 0;
+    int left_start = mid;
+    for (int i = mid; i >= low; i--) {
+        sum += arr[i];
+        if (sum <= constraint && sum > left_sum) {
+            left_sum = sum;
+            left_start = i;
+        }
+    }
+
+    sum = 0;
+    int right_sum = 0;
+    int right_end = mid + 1;
+    for (int j = mid + 1; j <= high; j++) {
+        sum += arr[j];
+        if (sum <= constraint && sum > right_sum) {
+            right_sum = sum;
+            right_end = j;
+        }
+    }
+
+    int total_sum = left_sum + right_sum;
+
+    Subarray cross = {total_sum, left_start, right_end};
+    if (total_sum > constraint) {
+        cross.sum = 0;
+    }
+
+    if (left.sum >= right.sum && left.sum >= cross.sum) {
+        return left;
+    } else if (right.sum >= left.sum && right.sum >= cross.sum) {
+        return right;
+    } else {
+        return cross;
+    }
+}
+
+int main() {
+    int n;
+
+    printf("Enter size of Resource Array: ");
+    scanf("%d", &n);
+
+    if (n <= 0) {
+        printf("No resources in the array!\n");
+        return 0;
+    }
+
+    int arr[n];
+    printf("Enter the Resource Array values:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Resource %d: ", i + 1);
+        scanf("%d", &arr[i]);
+    }
+
+    int constraint;
+    printf("Enter the resource constraint: ");
+    scanf("%d", &constraint);
+
+    Subarray result = Max_Sum_Subarray(arr, 0, n - 1, constraint);
+
+    if (result.sum == 0) {
+        printf("No valid subarray found!\n");
+    } else {
+        printf("Max sum = %d, from index %d to %d\n", result.sum, result.start, result.end);
+    }
+
+    return 0;
+}
